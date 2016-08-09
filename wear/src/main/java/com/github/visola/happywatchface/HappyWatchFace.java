@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.SurfaceHolder;
@@ -28,11 +27,12 @@ public class HappyWatchFace extends CanvasWatchFaceService {
 
         UpdateTimeHandler mUpdateTimeHandler = new UpdateTimeHandler(this);
         Paint mBackgroundPaint;
-        Paint mTextPaint;
+        Paint mHourTextPaint;
+        Paint mDayTextPaint;
         boolean mAmbient;
         Calendar mCalendar;
-        float mXOffset;
-        float mYOffset;
+        float mHourYOffset;
+        float mLineSpace;
         boolean mLowBitAmbient;
 
         @Override
@@ -48,13 +48,14 @@ public class HappyWatchFace extends CanvasWatchFaceService {
 
             Resources resources = HappyWatchFace.this.getResources();
 
-            mYOffset = resources.getDimension(R.dimen.digital_y_offset);
+            mHourYOffset = resources.getDimension(R.dimen.digital_hour_y_offset);
+            mLineSpace = resources.getDimension(R.dimen.digital_text_line_space);
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
-            mTextPaint = new Paint();
-            mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+            mHourTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+            mDayTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
 
             mCalendar = Calendar.getInstance();
         }
@@ -65,11 +66,8 @@ public class HappyWatchFace extends CanvasWatchFaceService {
 
             // Load resources that have alternate values for round watches.
             Resources resources = HappyWatchFace.this.getResources();
-            boolean isRound = insets.isRound();
-            mXOffset = resources.getDimension(isRound ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
-            float textSize = resources.getDimension(isRound ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
-
-            mTextPaint.setTextSize(textSize);
+            mHourTextPaint.setTextSize(resources.getDimension(R.dimen.digital_hour_text_size));
+            mDayTextPaint.setTextSize(resources.getDimension(R.dimen.digital_day_text_size));
         }
 
         @Override
@@ -90,7 +88,8 @@ public class HappyWatchFace extends CanvasWatchFaceService {
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
-                    mTextPaint.setAntiAlias(!inAmbientMode);
+                    mHourTextPaint.setAntiAlias(!inAmbientMode);
+                    mDayTextPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -108,13 +107,24 @@ public class HappyWatchFace extends CanvasWatchFaceService {
 
             mCalendar.setTimeInMillis(System.currentTimeMillis());
 
-            final String text;
+            final String hourText;
             if (mAmbient) {
-                text = String.format("%d:%02d", mCalendar.get(Calendar.HOUR), mCalendar.get(Calendar.MINUTE));
+                hourText = String.format("%d:%02d", mCalendar.get(Calendar.HOUR), mCalendar.get(Calendar.MINUTE));
             } else {
-                text = String.format("%d:%02d:%02d", mCalendar.get(Calendar.HOUR), mCalendar.get(Calendar.MINUTE), mCalendar.get(Calendar.SECOND));
+                hourText = String.format("%d:%02d:%02d", mCalendar.get(Calendar.HOUR), mCalendar.get(Calendar.MINUTE), mCalendar.get(Calendar.SECOND));
             }
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+
+            Rect hourTextBounds = new Rect();
+            mHourTextPaint.getTextBounds(hourText, 0, hourText.length(), hourTextBounds);
+
+            canvas.drawText(hourText, canvas.getWidth() / 2 - hourTextBounds.width() / 2, mHourYOffset, mHourTextPaint);
+
+            final String dayText = String.format("%04d-%02d-%02d", mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH) + 1, mCalendar.get(Calendar.DAY_OF_MONTH));
+
+            Rect dayTextBounds = new Rect();
+            mDayTextPaint.getTextBounds(dayText, 0, dayText.length(), dayTextBounds);
+
+            canvas.drawText(dayText, canvas.getWidth() / 2 - dayTextBounds.width() / 2, mHourYOffset + hourTextBounds.height() + mLineSpace, mDayTextPaint);
         }
 
         @Override
