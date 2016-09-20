@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="app_name">HappyWatchFace</string>
+
+    <string name="button_cancel">Cancel</string>
+    <string name="button_save">Save</string>
+
+    <string name="label_background_color">Background Color:</string>
+    <string name="label_date_format">Date Format:</string>
+    <string name="label_time_format">Time Format:</string>
+</resources>

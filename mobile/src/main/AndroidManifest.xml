@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.visola.happywatchface" >
+
+    <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="23" />
+
+    <!-- Permissions required by the wearable app -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_happy_watch_face"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+
+        <activity
+            android:name=".ConfigurationActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="com.example.android.wearable.watchface.CONFIG_DIGITAL" />
+                <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+    </application>
+</manifest>
